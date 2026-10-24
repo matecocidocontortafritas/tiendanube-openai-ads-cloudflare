@@ -1,0 +1,52 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tiendanube-openai-ads",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-24",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "openai-conversions.example.com",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "staging",
+    "SERVICE_NAME": "tiendanube-openai-ads",
+    "INTEGRATION_SOURCE": "community_tiendanube_cloudflare",
+    "PUBLIC_BASE_URL": "https://openai-conversions.example.com",
+    "TIENDANUBE_APP_ID": "YOUR_APP_ID",
+    "TIENDANUBE_CONTACT_EMAIL": "developer@example.com",
+    "TIENDANUBE_STOREFRONT_SCRIPT_ID": "YOUR_SCRIPT_ID"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tiendanube-openai-ads",
+      "database_id": "YOUR_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "EVENTS_QUEUE",
+        "queue": "tiendanube-openai-ads-events"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "tiendanube-openai-ads-events",
+        "max_batch_size": 1,
+        "max_batch_timeout": 5,
+        "max_retries": 8,
+        "retry_delay": 60,
+        "dead_letter_queue": "tiendanube-openai-ads-dlq"
+      }
+    ]
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

@@ -1,0 +1,13 @@
+ENVIRONMENT=staging
+SERVICE_NAME=tiendanube-openai-ads
+INTEGRATION_SOURCE=community_tiendanube_cloudflare
+PUBLIC_BASE_URL=https://openai-conversions.example.com
+TIENDANUBE_APP_ID=YOUR_APP_ID
+TIENDANUBE_CONTACT_EMAIL=developer@example.com
+TIENDANUBE_STOREFRONT_SCRIPT_ID=YOUR_SCRIPT_ID
+TIENDANUBE_APP_SECRET=replace-me
+CREDENTIALS_ENCRYPTION_KEY=replace-with-32-byte-base64-key
+OPENAI_PIXEL_ID_DEMO=replace-me
+OPENAI_CAPI_KEY_DEMO=replace-me
+OPERATOR_TEST_TOKEN=replace-me
+
