@@ -29,18 +29,27 @@ Conectar una tienda Tiendanube con:
 13. se ejecutaron tests y typecheck;
 14. se probó la tienda con una sesión limpia de Chrome.
 
-## Hallazgo real
+## Hallazgos reales y resolución
 
-El portal y la API de Tiendanube informaban:
+La primera revisión terminó correctamente en “todavía no operativo”: el portal y la API mostraban el Script activo y asociado, pero Chrome no descargaba su archivo. Se preparó evidencia para Partner Support sin publicar credenciales ni datos del cliente.
 
-- Script activo;
-- versión correcta;
-- asociación existente;
-- instalación automática desactivada según diseño.
+En una revisión posterior el Script sí apareció en la tienda publicada. La validación completa reveló cuatro problemas que una pantalla “active” no permite detectar:
 
-Sin embargo, Chrome no recibió el archivo del Script. Otros Scripts de la tienda sí aparecían en Network, pero no el nuevo. Tampoco existían los objetos globales del bootstrap/Pixel.
+1. la versión publicada cargaba una ruta histórica `/pixel/<client_key>.js`, que respondía `404`;
+2. `onfirstinteraction` demoraba la descarga hasta el primer click, tap o scroll;
+3. la vista previa y la tienda publicada usaban temas distintos;
+4. el tema publicado agregaba al carrito por AJAX, cancelaba el submit nativo y no actualizaba `LS.cart` de inmediato.
 
-Conclusión correcta: la infraestructura y la asociación estaban configuradas, pero el Pixel browser-side **no estaba operativo**. Se preparó un ticket a Partner Support con App ID, Script ID, Store ID, versión, URL y timestamp.
+Se agregó una ruta de compatibilidad que resuelve el cliente de forma exacta en D1 y vuelve a aplicar el aislamiento por tienda, sin fallback entre clientes. Para el carrito se combinó el click del control con una comprobación del aumento real del contador y datos estructurados de producto/variante.
+
+Después del despliegue se observaron en el Event Stream real:
+
+- `page_viewed`;
+- `contents_viewed` con producto, moneda e importe;
+- `items_added` con producto, cantidad, moneda e importe;
+- `checkout_started` con subtotal completo y contenido del carrito.
+
+La prueba se detuvo en el primer paso del checkout. No se ingresaron datos personales ni se realizó un pago. `order_created` por CAPI continúa en `validate_only` hasta disponer de una orden pagada controlada. La compra por Pixel tampoco se declara operativa hasta verla en el runtime real de la página de éxito.
 
 ## Aprendizajes
 
@@ -52,6 +61,8 @@ Conclusión correcta: la infraestructura y la asociación estaban configuradas, 
 - rotar inmediatamente cualquier clave que aparezca en una captura o salida accesible;
 - documentar el límite entre Script clásico y NubeSDK checkout;
 - mantener CAPI en `validate_only` hasta que haya una orden pagada controlada.
+- crear las definiciones de conversión no exige campañas activas;
+- los eventos de valor pueden probarse antes de lanzar campañas, pero su uso posterior depende de las funciones disponibles en Ads Manager.
 
 ## Evidencia mínima para cerrar una instalación
 
@@ -60,7 +71,7 @@ Conclusión correcta: la infraestructura y la asociación estaban configuradas, 
 [ ] OAuth app+store activo
 [ ] webhook order/paid registrado
 [ ] Script descargado realmente en Chrome
-[ ] eventos browser recibidos por OpenAI
+[ ] eventos browser recibidos por OpenAI (`page_viewed`, `contents_viewed`, `items_added`, `checkout_started`)
 [ ] CAPI validate_only aceptada
 [ ] CAPI real recibida
 [ ] Pixel y CAPI comparten tn_order_<ORDER_ID>

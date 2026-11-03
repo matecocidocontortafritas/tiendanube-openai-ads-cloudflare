@@ -103,7 +103,7 @@ No ejecutes `wrangler deploy` todavía. Primero completa [Cloudflare](docs/05-cl
 - [Cloudflare D1](https://developers.cloudflare.com/d1/)
 - [Cloudflare Queues](https://developers.cloudflare.com/queues/)
 
-Documentación revisada el **24 de octubre de 2026**. Antes de una nueva instalación, comprobar si cambiaron endpoints, permisos, nombres de eventos o requisitos de aprobación.
+Documentación revisada el **3 de noviembre de 2026**. Antes de una nueva instalación, comprobar si cambiaron endpoints, permisos, nombres de eventos o requisitos de aprobación.
 
 ## Alcance y límites
 

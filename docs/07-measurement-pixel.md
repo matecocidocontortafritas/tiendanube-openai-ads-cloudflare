@@ -9,12 +9,21 @@ El Script de Tiendanube carga un JavaScript generado por el Worker. Ese JavaScri
 | Evento | Cuándo se intenta medir |
 |---|---|
 | `page_viewed` | al inicializar en una página del storefront |
-| `contents_viewed` | cuando `LS.product` identifica un producto |
-| `items_added` | cuando se detecta un aumento real del carrito después del submit |
-| `checkout_started` | al enviar o pulsar un control de checkout |
+| `contents_viewed` | cuando `LS.product` identifica un producto; incluye ID, nombre y precio cuando la variante se resuelve de forma fiable |
+| `items_added` | cuando se detecta un aumento real del carrito; incluye delta, valor y productos agregados |
+| `checkout_started` | al enviar o pulsar el control de checkout; incluye subtotal y contenido del carrito |
 | `order_created` | sólo si el runtime donde corre el Pixel expone `LS.order.id` |
 
 Tiendanube documenta los importes de `LS.cart` y `LS.order` en centavos/unidades menores. El código los envía como enteros sin volver a multiplicarlos.
+
+### Temas clásicos: no alcanza con mirar la URL del formulario
+
+Algunos temas de Tiendanube usan la misma acción `/comprar/` para dos operaciones distintas:
+
+- agregar producto: `data-component="product.add-to-cart"`, clase `js-addtocart` o formulario `data-store="product-form-..."`;
+- iniciar compra: `name="go_to_checkout"` o `data-component="cart.checkout-button"`.
+
+El detector combina la acción del formulario con esos marcadores y aplica un antirrebote al checkout. Después de cada cambio de tema hay que repetir la prueba real: los selectores son una compatibilidad del storefront clásico, no un contrato universal de NubeSDK.
 
 ## Carga por tienda
 
@@ -31,6 +40,18 @@ https://openai-conversions.example.com/pixel/storefront.js?store_id=123456
 ```
 
 El Worker responde `404` si la tienda no está habilitada y `503` si el Pixel Secret no existe.
+
+### Ruta de compatibilidad por cliente
+
+Un Script ya publicado puede haber quedado configurado para cargar una URL corta como:
+
+```text
+https://openai-conversions.example.com/pixel/demo-store.js
+```
+
+El Worker admite esa forma únicamente si `demo-store` coincide exactamente con un `client_key` de D1. Primero resuelve su `store_id` y después aplica las mismas validaciones de tienda habilitada y Secret explícito que `/pixel/storefront.js`. Una clave desconocida devuelve `404`; no existe fallback hacia otro cliente.
+
+La ruta canónica para instalaciones nuevas sigue siendo `/pixel/storefront.js?store_id=<STORE_ID>`.
 
 ## Consentimiento
 
@@ -111,5 +132,5 @@ No publiques “Pixel de compra funcionando” basándote únicamente en que el 
 
 - [OpenAI Measurement Pixel](https://developers.openai.com/ads/measurement-pixel)
 - [OpenAI Supported Events](https://developers.openai.com/ads/supported-events)
-- [Tiendanube Scripts](https://tiendanube.github.io/api-documentation/resources/script)
+- [Tiendanube Scripts](https://tiendanube.github.io/api-documentation/v1/resources/script)
 - [NubeSDK Order Events](https://dev.tiendanube.com/pt/docs/applications/nube-sdk/events/order)

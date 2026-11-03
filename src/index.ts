@@ -1,7 +1,7 @@
 import type { Env, QueueMessage } from "./env";
 import { json } from "./http";
 import { processQueueMessage } from "./processor";
-import { serveStorefrontPixel } from "./pixel";
+import { serveStorefrontPixel, serveStorefrontPixelByClient } from "./pixel";
 import {
   associateStorefrontScript,
   orderStatus,
@@ -50,6 +50,11 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/pixel/storefront.js") {
       return serveStorefrontPixel(request, env);
+    }
+
+    if (request.method === "GET") {
+      const clientPixel = url.pathname.match(/^\/pixel\/([a-z0-9][a-z0-9_-]{0,63})\.js$/);
+      if (clientPixel) return serveStorefrontPixelByClient(request, env, clientPixel[1]);
     }
 
     if (url.pathname === "/ops/replay-order") return replayOrder(request, env);

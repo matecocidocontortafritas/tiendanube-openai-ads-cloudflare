@@ -59,6 +59,34 @@ Comprobar `enabled=1` y que el `store_id` de la URL sea el correcto.
 - el Pixel ID pertenece a otra fuente;
 - el evento ocurre en checkout/NubeSDK y el script clásico no está presente.
 
+Si el Script usa `onfirstinteraction`, abrir o recargar la página no basta: hacé un click, tap o scroll y recién entonces buscá la descarga del bootstrap, del JavaScript del Worker y del SDK oficial.
+
+## El bootstrap carga pero `/pixel/<cliente>.js` responde 404
+
+Puede existir un Script publicado antes de adoptar la ruta canónica `/pixel/storefront.js?store_id=...`. Verificá que:
+
+- el `client_key` de la URL exista exactamente en D1;
+- la fila apunte al `store_id` correcto;
+- la tienda esté habilitada;
+- el slot `OPENAI_PIXEL_ID_<CLIENTE>` exista para ese cliente.
+
+No agregues un Pixel global como fallback: un error de configuración debe fallar cerrado para impedir mezclar credenciales entre tiendas.
+
+## Hay page/product view pero no carrito o checkout
+
+Inspeccioná el formulario y el control que lo envía. En varios temas clásicos, agregar al carrito e iniciar compra usan ambos `action="/comprar/"`; se distinguen por:
+
+```text
+product.add-to-cart / js-addtocart / product-form
+cart.checkout-button / go_to_checkout
+```
+
+Si el detector sólo busca palabras como `cart` o `checkout` en la URL, perderá ambos eventos. Corregí los selectores, agregá antirrebote para no emitir dos `checkout_started` por click+submit, desplegá y repetí la prueba en Event Stream. No declares el funnel operativo basándote únicamente en pruebas unitarias.
+
+Algunos temas interceptan el submit con AJAX, cancelan el evento nativo y actualizan el contador visible antes que `LS.cart`. En ese caso, observá el click del control y confirmá que el contador del carrito aumentó antes de emitir `items_added`; usá los datos estructurados de la variante, nunca el precio parseado desde texto visible.
+
+También comprobá qué tema está realmente publicado. La vista previa de un borrador puede tener selectores y comportamiento distintos de la tienda que recibe tráfico.
+
 ## Importes 100 veces mayores o menores
 
 OpenAI espera unidades menores. Tiendanube `LS.cart`/`LS.order` ya expone importes en centavos para el Script clásico; la Order API suele entregar decimales que el Worker convierte. No aplicar la misma conversión a ambos orígenes.

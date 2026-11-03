@@ -35,6 +35,18 @@ No inspecciones el token cifrado salvo para diagnosticar corrupción; nunca inte
 
 ## Fase 4: Pixel en Chrome
 
+Antes de navegar, creá en Ads Manager una definición por cada evento estándar, todas asociadas a la misma fuente/Pixel:
+
+| Nombre visible sugerido | Evento base exacto |
+|---|---|
+| Vista de página | `page_viewed` |
+| Vista de producto | `contents_viewed` |
+| Agregado al carrito | `items_added` |
+| Inicio de checkout | `checkout_started` |
+| Compra completada | `order_created` |
+
+Crear la definición no genera el evento. Sólo le indica a Ads Manager qué evento recibido debe tratar como conversión. Se pueden crear y probar estas definiciones sin campañas activas.
+
 Usá un perfil limpio y DevTools, siguiendo [Measurement Pixel](07-measurement-pixel.md). Para cada evento anotá:
 
 | Caso | Acción | Resultado |
@@ -47,6 +59,16 @@ Usá un perfil limpio y DevTools, siguiendo [Measurement Pixel](07-measurement-p
 | success compatible | completar orden | `order_created` con `tn_order_<ID>` |
 
 Separá “el script fue descargado” de “OpenAI recibió el evento”. Son comprobaciones distintas.
+
+En Ads Manager → Conversiones → Flujo de eventos, iniciá el sondeo antes de abrir la tienda. La prueba completa debe demostrar, en este orden:
+
+1. `page_viewed` al cargar/interactuar;
+2. `contents_viewed` al abrir una ficha;
+3. `items_added` después de confirmar que la cantidad del carrito aumentó;
+4. `checkout_started` antes de abandonar el storefront;
+5. `order_created` por CAPI para una orden real pagada y, sólo si el runtime de éxito es compatible, también por Pixel con el mismo `tn_order_<ID>`.
+
+No continúes a pago únicamente para producir telemetría. La compra requiere una orden de prueba autorizada; `validate_only` permite verificar CAPI sin guardar un evento real.
 
 ## Fase 5: CAPI con `validate_only`
 

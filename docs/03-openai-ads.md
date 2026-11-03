@@ -72,6 +72,16 @@ JPY 8.900     → 8900
 
 `contents[].amount` representa el precio de **una unidad**; `quantity` se envía aparte. `data.amount` representa el total del evento.
 
+En este proyecto:
+
+- `items_added` informa el valor de las unidades agregadas y su detalle;
+- `checkout_started` informa el subtotal completo del carrito y los productos presentes;
+- `order_created` informa el total final de la orden pagada y sus productos.
+
+Esto permite que OpenAI reciba señales de intención y valor, además del simple conteo. No confundas disponibilidad del dato con una promesa de optimización: la documentación confirma el schema y la medición, pero la interfaz, el objetivo de campaña y el producto Ads disponible en cada cuenta determinan cómo se utiliza después. No inventes “segmentos por monto” si Ads Manager no ofrece esa función explícitamente.
+
+`contents_viewed` identifica el producto visto. El precio también es admisible en el schema. El Pixel lo toma de `LS.variants[].price_number_raw` únicamente cuando puede resolver la variante seleccionada —o existe una sola—; si no puede hacerlo de forma fiable, omite el importe. Nunca lo infiere desde texto visible ni desde un precio promocional ambiguo.
+
 ## 6. Atribución y matching
 
 - `oppref`: referencia del click; el Pixel la captura desde la URL. CAPI debe preservarla explícitamente cuando esté disponible.
